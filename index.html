@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Piano CZ">
+<meta name="theme-color" content="#0c0f1a">
+<title>Piano Trasformazione — Claudio</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0c0f1a;--card:#141829;--border:rgba(255,255,255,0.06);--text:#e2e8f0;--muted:#64748b;--dim:#94a3b8;--accent:#818cf8;--blue:#38bdf8;--green:#4ade80;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent;padding-bottom:80px}
+.header{background:linear-gradient(135deg,#0f172a,#1e1b4b);padding:32px 20px 20px;border-bottom:1px solid rgba(99,102,241,0.2)}
+.header .tag{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:4px}
+.header h1{font-size:24px;font-weight:700;color:#f1f5f9}
+.stats{display:flex;gap:20px;margin-top:14px;flex-wrap:wrap}
+.stat .label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.stat .val{font-size:20px;font-weight:700}
+.stat .sub{font-size:11px;color:#475569}
+.tabs{display:flex;gap:0;overflow-x:auto;background:#0f1322;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;-webkit-overflow-scrolling:touch}
+.tabs button{background:none;border:none;color:var(--muted);padding:13px 13px 11px;font-size:12px;font-weight:600;white-space:nowrap;border-bottom:2px solid transparent;cursor:pointer}
+.tabs button.active{color:var(--accent);border-bottom-color:var(--accent)}
+.content{max-width:800px;margin:0 auto;padding:20px 16px 40px}
+.section-title{font-size:17px;font-weight:700;color:#f1f5f9;margin:0 0 14px}
+.card{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border);margin-bottom:10px}
+.rule{display:flex;gap:10px;align-items:flex-start;padding:7px 12px;background:var(--card);border-radius:8px;margin-bottom:6px}
+.rule span:first-child{font-size:15px;flex-shrink:0}
+.rule span:last-child{font-size:13px;color:#cbd5e1;line-height:1.5}
+.priority{border-left:3px solid;padding:14px;border-radius:0 12px 12px 0;background:var(--card);margin-bottom:8px}
+.priority .n{font-size:10px;font-weight:700;text-transform:uppercase;margin-bottom:2px}
+.priority .t{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
+.priority .d{font-size:12px;color:var(--muted);line-height:1.4}
+.meal{margin-bottom:12px}
+.meal .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.meal .time{font-size:12px;color:var(--muted);margin-right:8px}
+.meal .name{font-size:16px;font-weight:700}
+.meal .kcal{font-size:13px;font-weight:600;text-align:right}
+.meal .prot{font-size:11px;color:var(--muted)}
+.meal .item{font-size:13px;color:var(--dim);padding:3px 0 3px 12px;border-left:2px solid;margin-bottom:3px;line-height:1.4}
+.meal .note{font-size:12px;color:var(--muted);margin-top:10px;padding:7px 10px;background:rgba(255,255,255,0.03);border-radius:6px;line-height:1.4}
+.day-btn{background:#1e293b;color:var(--dim);border:none;padding:7px 13px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.day-btn.active{background:var(--accent);color:#fff}
+.week-row{display:flex;align-items:center;gap:14px;padding:14px 16px;margin-bottom:8px}
+.week-dot{width:8px;height:8px;border-radius:50%}
+.badge{font-size:10px;padding:3px 7px;border-radius:6px;font-weight:600;white-space:nowrap}
+.exercise{padding:14px 16px;cursor:pointer;width:100%;text-align:left}
+.exercise .top{display:flex;justify-content:space-between;align-items:center}
+.exercise .ename{font-size:14px;font-weight:600;color:var(--text)}
+.exercise .ereps{font-size:13px;margin-left:10px}
+.exercise .etarget{font-size:11px;color:var(--muted);background:#1e293b;padding:2px 7px;border-radius:6px}
+.exercise .detail{font-size:13px;color:var(--dim);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);line-height:1.6;display:none}
+.exercise.open .detail{display:block}
+.dna-item{padding:11px 14px;cursor:pointer;border-radius:10px;margin-bottom:5px;width:100%;text-align:left;border:1px solid transparent}
+.dna-item .row{display:flex;align-items:center;gap:9px}
+.dna-item .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dna-item .lbl{font-size:13px;font-weight:600;color:var(--text);flex:1}
+.dna-item .arrow{font-size:11px;color:var(--muted);transition:transform .2s}
+.dna-item.open .arrow{transform:rotate(180deg)}
+.dna-item .desc{font-size:12px;color:var(--dim);margin:9px 0 0 17px;line-height:1.5;display:none}
+.dna-item.open .desc{display:block}
+.dna-cat{font-size:13px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;margin:18px 0 8px}
+.check-row{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer}
+.check-box{width:22px;height:22px;border-radius:6px;border:2px solid #334155;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.check-box.done{border-color:var(--green);background:rgba(74,222,128,0.15)}
+.check-label{font-size:13px;color:#cbd5e1;transition:all .2s}
+.check-label.done{color:var(--green);text-decoration:line-through}
+.progress-bar{height:4px;background:#1e293b;border-radius:2px;margin-bottom:14px}
+.progress-fill{height:4px;border-radius:2px;transition:width .3s}
+.warn-box{padding:14px;border-radius:10px;margin-top:20px}
+.warn-box .wt{font-size:13px;font-weight:600;margin-bottom:5px}
+.warn-box .wd{font-size:12px;color:var(--dim);line-height:1.5}
+input[type=number]{background:var(--card);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 14px;color:var(--text);font-size:15px;outline:none;width:100%}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer}
+.legend{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-right:12px}
+.legend .ldot{width:8px;height:8px;border-radius:50%}
+.hidden{display:none}
+.batch-row{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);align-items:center}
+.batch-q{font-size:14px;font-weight:700;color:var(--accent);min-width:48px}
+.batch-item{font-size:13px;color:var(--text)}
+.batch-dur{font-size:11px;color:var(--muted)}
+.extra-ex{padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.extra-ex .top{display:flex;justify-content:space-between}
+.extra-ex .en{font-size:13px;font-weight:600;color:var(--text)}
+.extra-ex .er{font-size:12px;color:var(--green)}
+.extra-ex .ed{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
+</style>
+</head>
+<body>
+
+<div class="header">
+<div class="tag">Piano di Trasformazione</div>
+<h1>Claudio — Luglio → Agosto 2026</h1>
+<div class="stats">
+<div class="stat"><div class="label">Obiettivo</div><div class="val" style="color:var(--accent)">-10kg</div><div class="sub">98 → 88 kg</div></div>
+<div class="stat"><div class="label">Target kcal</div><div class="val" style="color:var(--blue)">1.900</div><div class="sub">/giorno</div></div>
+<div class="stat"><div class="label">Proteine</div><div class="val" style="color:var(--green)">190g</div><div class="sub">/giorno</div></div>
+<div class="stat"><div class="label">Persi</div><div class="val" id="lostStat" style="color:var(--yellow)">—</div><div class="sub" id="lostSub">iniziamo!</div></div>
+</div>
+</div>
+
+<div class="tabs" id="tabs">
+<button class="active" data-tab="overview">⚡ Panoramica</button>
+<button data-tab="food">🥗 Alimentazione</button>
+<button data-tab="training">🏊 Allenamento</button>
+<button data-tab="mobility">🧘 Mobilità</button>
+<button data-tab="dna">🧬 DNA</button>
+<button data-tab="tracker">📊 Tracker</button>
+</div>
+
+<div class="content">
+
+<!-- ===== OVERVIEW ===== -->
+<div id="tab-overview">
+<h2 class="section-title">Come funziona il piano</h2>
+<p style="color:var(--dim);line-height:1.7;font-size:14px;margin-bottom:20px">Piano costruito sulla tua genetica (test Holifya DNA Complete), preferenze alimentari e stile di vita. L'obiettivo: corpo funzionale, mobile e sano per il lungo termine.</p>
+
+<div class="priority" style="border-color:var(--green)"><div class="n" style="color:var(--green)">Priorità 1</div><div class="t">Mobilità</div><div class="d">Il tuo deficit più urgente — ogni giorno, anche solo 10 min</div></div>
+<div class="priority" style="border-color:var(--purple)"><div class="n" style="color:var(--purple)">Priorità 2</div><div class="t">Forza funzionale</div><div class="d">Protegge articolazioni e ossa — manubri 2x/settimana</div></div>
+<div class="priority" style="border-color:var(--blue)"><div class="n" style="color:var(--blue)">Priorità 3</div><div class="t">Cardio</div><div class="d">Nuoto 2x + bici quotidiana — migliora il VO2max</div></div>
+<div class="priority" style="border-color:var(--yellow)"><div class="n" style="color:var(--yellow)">Priorità 4</div><div class="t">Composizione</div><div class="d">Il grasso se ne va come conseguenza dei primi 3 + alimentazione</div></div>
+
+<h2 class="section-title" style="margin-top:24px">Regole d'oro (dal tuo DNA)</h2>
+<div class="rule"><span>🕐</span><span>Carboidrati SOLO a colazione e pranzo — mai a cena</span></div>
+<div class="rule"><span>🥩</span><span>Proteine ad OGNI pasto — sono il tuo carburante per dimagrire</span></div>
+<div class="rule"><span>🧂</span><span>Sale max 4g/giorno — sei geneticamente ipersensibile</span></div>
+<div class="rule"><span>☕</span><span>Max 1 caffè vero/giorno — slow metabolizer, rischio cardiovascolare</span></div>
+<div class="rule"><span>🥛</span><span>Zero latticini freschi — solo delattosati o stagionati con moderazione</span></div>
+<div class="rule"><span>🥬</span><span>Verdure a inizio pasto — poi proteine, poi carbo (evita picco glicemico)</span></div>
+<div class="rule"><span>💧</span><span>2L acqua iposodica/giorno — per la ritenzione a cui sei predisposto</span></div>
+<div class="rule"><span>🔥</span><span>Riscaldamento 10 min OBBLIGATORIO prima di ogni sessione</span></div>
+
+<div class="warn-box" style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2)">
+<div class="wt" style="color:var(--yellow)">⚠️ Da verificare col medico</div>
+<div class="wd">Tipo di calcolo renale (ossalato di calcio?) — cambia se puoi usare proteine di pisello ogni giorno. Livelli B12 (fabbisogno geneticamente aumentato). Valutare integrazione vitamina D + acido folico.</div>
+</div>
+
+<h2 class="section-title" style="margin-top:24px">Check giornaliero</h2>
+<div class="card" id="checkCard">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+<span style="font-size:12px;color:var(--muted)">Completati</span>
+<span style="font-size:14px;font-weight:700" id="checkCount">0/7</span>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="checkBar" style="width:0;background:var(--accent)"></div></div>
+<div id="checkList"></div>
+</div>
+</div>
+
+<!-- ===== FOOD ===== -->
+<div id="tab-food" class="hidden">
+<h2 class="section-title">Struttura giornaliera</h2>
+<p style="color:var(--muted);font-size:12px;margin-bottom:16px;margin-top:-8px">~1.900 kcal · 190-200g proteine · carbo solo mattina/pranzo · batch cooking 2-3 giorni</p>
+
+<div class="card meal"><div class="head"><div><span class="time">07:30</span><span class="name" style="color:var(--accent)">Colazione</span></div><div><div class="kcal">~350 kcal</div><div class="prot">25-30g proteine</div></div></div>
+<div class="item" style="border-color:rgba(129,140,248,0.3)">Latte di soia o avena (200ml)</div>
+<div class="item" style="border-color:rgba(129,140,248,0.3)">25g proteine pisello (o alterna riso/canapa)</div>
+<div class="item" style="border-color:rgba(129,140,248,0.3)">Mirtilli o ½ banana</div>
+<div class="item" style="border-color:rgba(129,140,248,0.3)">→ Frulla tutto — 2 min e via a lavoro</div>
+<div class="note">💡 Alterna le fonti proteiche: non solo pisello ogni giorno (ossalati → calcoli). Valuta proteine di riso o canapa.</div></div>
+
+<div class="card meal"><div class="head"><div><span class="time">12:30</span><span class="name" style="color:var(--blue)">Pranzo</span></div><div><div class="kcal">~550 kcal</div><div class="prot">35-40g proteine</div></div></div>
+<div class="item" style="border-color:rgba(56,189,248,0.3)">70g cous cous / farro / quinoa (a crudo)</div>
+<div class="item" style="border-color:rgba(56,189,248,0.3)">100g tempeh OPPURE 1 scatoletta (tonno/sgombro)</div>
+<div class="item" style="border-color:rgba(56,189,248,0.3)">80-100g legumi (ceci o lenticchie — dal batch)</div>
+<div class="item" style="border-color:rgba(56,189,248,0.3)">Verdure abbondanti (dal batch)</div>
+<div class="item" style="border-color:rgba(56,189,248,0.3)">10g olio EVO + curcuma/zenzero (NO sale aggiunto)</div>
+<div class="note">💡 Max 1 scatoletta/giorno per il sodio. Ordine: verdure → proteine → carbo.</div></div>
+
+<div class="card meal"><div class="head"><div><span class="time">16:00</span><span class="name" style="color:var(--purple)">Spuntino</span></div><div><div class="kcal">~250 kcal</div><div class="prot">10-15g proteine</div></div></div>
+<div class="item" style="border-color:rgba(167,139,250,0.3)">20g mandorle o noci</div>
+<div class="item" style="border-color:rgba(167,139,250,0.3)">1 frutto (mela, kiwi, frutti di bosco)</div>
+<div class="item" style="border-color:rgba(167,139,250,0.3)">Secondo shake leggero se serve (facoltativo)</div>
+<div class="note">💡 Frutti di bosco consigliati dal tuo profilo genetico per lo stress ossidativo.</div></div>
+
+<div class="card meal"><div class="head"><div><span class="time">20:00</span><span class="name" style="color:var(--green)">Cena</span></div><div><div class="kcal">~550 kcal</div><div class="prot">40-50g proteine</div></div></div>
+<div class="item" style="border-color:rgba(74,222,128,0.3)">150-180g pesce (salmone, orata, sgombro, merluzzo)</div>
+<div class="item" style="border-color:rgba(74,222,128,0.3)">OPPURE 150g tempeh + 60g legumi</div>
+<div class="item" style="border-color:rgba(74,222,128,0.3)">Verdure a volontà</div>
+<div class="item" style="border-color:rgba(74,222,128,0.3)">10g olio EVO</div>
+<div class="item" style="border-color:rgba(74,222,128,0.3)">ZERO o minimo carbo qui</div>
+<div class="note">💡 Pesce 2-3x/settimana, tempeh+legumi gli altri giorni.</div></div>
+
+<h2 class="section-title" style="margin-top:24px">Batch cooking (domenica o lunedì)</h2>
+<div class="card">
+<div class="batch-row"><div class="batch-q">300g</div><div><div class="batch-item">Cous cous / farro / quinoa cotto</div><div class="batch-dur">Dura 3-4 giorni in frigo</div></div></div>
+<div class="batch-row"><div class="batch-q">400g</div><div><div class="batch-item">Legumi cotti (ceci + lenticchie)</div><div class="batch-dur">Anche in barattolo, basta sciacquare</div></div></div>
+<div class="batch-row"><div class="batch-q">200g</div><div><div class="batch-item">Tempeh saltato con curcuma/zenzero</div><div class="batch-dur">Porzionato in contenitori</div></div></div>
+<div class="batch-row"><div class="batch-q">~500g</div><div><div class="batch-item">Verdure arrostite/saltate miste</div><div class="batch-dur">Zucchine, peperoni, melanzane, broccoli</div></div></div>
+</div>
+</div>
+
+<!-- ===== TRAINING ===== -->
+<div id="tab-training" class="hidden">
+<h2 class="section-title">Schema settimanale</h2>
+<p style="color:var(--muted);font-size:12px;margin-bottom:16px;margin-top:-8px">Bici e-bike commute Lun-Ven (9km) · Nuoto 2x · Manubri 2x · Mobilità ogni giorno</p>
+
+<div class="card week-row"><div style="width:44px;text-align:center"><div style="font-size:12px;font-weight:700;color:var(--purple)">Lun</div><div class="week-dot" style="background:var(--purple);margin:5px auto 0"></div></div><div style="flex:1"><div style="font-size:14px;font-weight:600">Manubri + Mobilità</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Circuito 6kg (15 min) + mobilità (15 min)</div></div><div class="badge" style="color:var(--blue);background:rgba(56,189,248,0.1)">🚲 9km</div></div>
+<div class="card week-row"><div style="width:44px;text-align:center"><div style="font-size:12px;font-weight:700;color:var(--blue)">Mar</div><div class="week-dot" style="background:var(--blue);margin:5px auto 0"></div></div><div style="flex:1"><div style="font-size:14px;font-weight:600">Nuoto</div><div style="font-size:12px;color:var(--muted);margin-top:2px">45-60 min — stile libero + dorso</div></div><div class="badge" style="color:var(--blue);background:rgba(56,189,248,0.1)">🚲 9km</div></div>
+<div class="card week-row"><div style="width:44px;text-align:center"><div style="font-size:12px;font-weight:700;color:var(--green)">Mer</div><div class="week-dot" style="background:var(--green);margin:5px auto 0"></div></div><div style="flex:1"><div style="font-size:14px;font-weight:600">Mobilità profonda</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Stretching profondo (20 min) — focus fianchi/lombare</div></div><div class="badge" style="color:var(--blue);background:rgba(56,189,248,0.1)">🚲 9km</div></div>
+<div class="card week-row"><div style="width:44px;text-align:center"><div style="font-size:12px;font-weight:700;color:var(--purple)">Gio</div><div class="week-dot" style="background:var(--purple);margin:5px auto 0"></div></div><div style="flex:1"><div style="font-size:14px;font-weight:600">Manubri + Mobilità</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Circuito 6kg (15 min) + mobilità (15 min)</div></div><div class="badge" style="color:var(--blue);background:rgba(56,189,248,0.1)">🚲 9km</div></div>
+<div class="card week-row"><div style="width:44px;text-align:center"><div style="font-size:12px;font-weight:700;color:var(--blue)">Ven</div><div class="week-dot" style="background:var(--blue);margin:5px auto 0"></div></div><div style="flex:1"><div style="font-size:14px;font-weight:600">Nuoto</div><div style="font-size:12px;color:var(--muted);margin-top:2px">45-60 min — stile libero + dorso</div></div><div class="badge" style="color:var(--blue);background:rgba(56,189,248,0.1)">🚲 9km</div></div>
+<div class="card week-row"><div style="width:44px;text-align:center"><div style="font-size:12px;font-weight:700;color:var(--blue)">Sab</div><div class="week-dot" style="background:var(--blue);margin:5px auto 0"></div></div><div style="flex:1"><div style="font-size:14px;font-weight:600">Giretto bici lungo</div><div style="font-size:12px;color:var(--muted);margin-top:2px">~20km + mobilità/stretching (15 min)</div></div></div>
+<div class="card week-row"><div style="width:44px;text-align:center"><div style="font-size:12px;font-weight:700;color:var(--muted)">Dom</div><div class="week-dot" style="background:var(--muted);margin:5px auto 0"></div></div><div style="flex:1"><div style="font-size:14px;font-weight:600">Riposo</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Mobilità leggera (10 min) — solo stretching</div></div></div>
+
+<div style="display:flex;gap:8px;margin:16px 0;flex-wrap:wrap">
+<div class="legend"><div class="ldot" style="background:var(--purple)"></div>Forza</div>
+<div class="legend"><div class="ldot" style="background:var(--blue)"></div>Cardio</div>
+<div class="legend"><div class="ldot" style="background:var(--green)"></div>Recovery</div>
+<div class="legend"><div class="ldot" style="background:var(--muted)"></div>Riposo</div>
+</div>
+
+<h2 class="section-title" style="margin-top:24px">Circuito manubri 6kg (Lun + Gio)</h2>
+<p style="color:var(--muted);font-size:12px;margin-bottom:12px;margin-top:-8px">3 giri del circuito · 60s pausa tra i giri · ~15 min totali</p>
+<div id="strengthList"></div>
+
+<div class="warn-box" style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);margin-top:20px">
+<div class="wt" style="color:var(--red)">⚠️ Regola non negoziabile</div>
+<div class="wd">10 minuti di riscaldamento + stretching PRIMA di ogni sessione. Per il tuo profilo genetico (lassità articolare + tempi di recupero più lunghi) saltare il warm-up è il modo più veloce per infortunarti.</div>
+</div>
+</div>
+
+<!-- ===== MOBILITY ===== -->
+<div id="tab-mobility" class="hidden">
+<h2 class="section-title">Routine mobilità quotidiana</h2>
+<p style="color:var(--muted);font-size:12px;margin-bottom:16px;margin-top:-8px">10 min/giorno — la singola abitudine con il maggior impatto per il tuo corpo adesso</p>
+<div id="mobilityList"></div>
+
+<h2 class="section-title" style="margin-top:28px">Perché è la tua priorità #1</h2>
+<div class="card" style="font-size:13px;color:var(--dim);line-height:1.7">
+Parti da "molto poco flessibile" + lassità articolare + lombalgia + collagene meno resistente. Il corpo compensa la rigidità con movimenti scorretti, che caricano le articolazioni già vulnerabili. La mobilità rompe questo ciclo. I primi miglioramenti (4-6 settimane) sono i più rapidi.
+</div>
+
+<h2 class="section-title" style="margin-top:24px">Extra: lombare specifica</h2>
+<p style="color:var(--muted);font-size:12px;margin-bottom:10px;margin-top:-8px">Aggiungi questi nei giorni in cui la lombare ti dà più fastidio</p>
+<div class="card">
+<div class="extra-ex"><div class="top"><div class="en">Bird-Dog</div><div class="er">8 per lato</div></div><div class="ed">A quattro zampe, estendi braccio dx + gamba sx simultaneamente. Mantieni 3 sec. Core attivo.</div></div>
+<div class="extra-ex"><div class="top"><div class="en">Pelvic Tilt</div><div class="er">15 ripetizioni</div></div><div class="ed">Supino, appiattisci la lombare contro il pavimento contraendo gli addominali.</div></div>
+<div class="extra-ex"><div class="top"><div class="en">Knee-to-Chest</div><div class="er">30s per gamba</div></div><div class="ed">Supino, porta un ginocchio al petto. Decomprime la lombare immediatamente.</div></div>
+</div>
+</div>
+
+<!-- ===== DNA ===== -->
+<div id="tab-dna" class="hidden">
+<h2 class="section-title">Mappa genetica — cosa ricordare</h2>
+<p style="color:var(--muted);font-size:12px;margin-bottom:16px;margin-top:-8px">Sintesi dal test Holifya DNA Complete</p>
+<div id="dnaList"></div>
+<div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
+<div class="legend"><div class="ldot" style="background:var(--green)"></div>Favorevole</div>
+<div class="legend"><div class="ldot" style="background:var(--yellow)"></div>Lievemente sfavorevole</div>
+<div class="legend"><div class="ldot" style="background:var(--red)"></div>Sfavorevole</div>
+</div>
+</div>
+
+<!-- ===== TRACKER ===== -->
+<div id="tab-tracker" class="hidden">
+<h2 class="section-title">Peso</h2>
+<div style="display:flex;gap:10px;margin-bottom:18px">
+<input type="number" step="0.1" placeholder="es. 97.5" id="weightInput">
+<button class="btn" onclick="saveWeight()">Salva</button>
+</div>
+<div id="trackerContent"></div>
+
+<h2 class="section-title" style="margin-top:28px">Aspettative realistiche</h2>
+<div class="card" style="font-size:13px;color:var(--dim);line-height:1.7">
+Con un deficit del 20-25% e il tuo profilo genetico, aspettati 0,5-1 kg/settimana — quindi 6-8 kg entro fine agosto. Le prime 2 settimane potresti perdere di più (acqua/ritenzione), poi si stabilizza.
+</div>
+</div>
+
+</div>
+
+<script>
+// === DATA ===
+const CHECKS=[{k:"shake",l:"Shake proteico mattina"},{k:"commute",l:"Bici a lavoro (o attività)"},{k:"mobility",l:"Mobilità/stretching"},{k:"water",l:"2L acqua iposodica"},{k:"salt",l:"Sale sotto controllo (<4g)"},{k:"protein",l:"Proteine ad ogni pasto"},{k:"carbs",l:"Carbo solo mattina/pranzo"}];
+const STRENGTH=[{n:"Squat con manubri",s:"3×12",t:"Quadricipiti/glutei",d:"Protegge il ginocchio — rinforza la muscolatura stabilizzatrice"},{n:"Stacco rumeno leggero",s:"3×12",t:"Posteriori/lombare",d:"Movimento lento e controllato — NON arrotondare la schiena"},{n:"Alzate laterali",s:"3×12",t:"Spalle",d:"Gomiti leggermente piegati, non superare altezza spalle"},{n:"Rematore su una gamba",s:"3×10/lato",t:"Core/schiena",d:"Ottimo per stabilità e core — lavora anche sull'equilibrio"},{n:"Plank",s:"3×30-40s",t:"Core profondo",d:"Fondamentale per la lombare — non lasciare cadere i fianchi"}];
+const MOBILITY=[{n:"Cat-Cow",r:"10 rip lente",t:"Lombare",d:"A quattro zampe, inspira inarcando (cow), espira arrotondando (cat). Lento e controllato."},{n:"World's Greatest Stretch",r:"5 per lato",t:"Anche/fianchi",d:"Affondo avanti, gomito verso pavimento, poi ruota il braccio verso il soffitto. Il più completo per la mobilità."},{n:"90/90 Hip Switch",r:"8 per lato",t:"Rotazione anche",d:"Seduto, gambe piegate a 90°, ruota le ginocchia da un lato all'altro mantenendo busto eretto."},{n:"Dead Hang",r:"20-30 sec",t:"Colonna/spalle",d:"Appenditi a sbarra o bordo porta. Decomprime la colonna e apre le spalle."},{n:"Child's Pose",r:"30 sec",t:"Lombare/relax",d:"Seduto sui talloni, braccia avanti, fronte a terra. Respira nella schiena bassa."}];
+const DNA=[{cat:"Intolleranze",items:[{l:"Lattosio",s:"bad",d:"Geneticamente intollerante — no latticini freschi, sì delattosati e stagionati con moderazione"},{l:"Caffeina",s:"bad",d:"Slow metabolizer — max 1 caffè/giorno (200mg). Nessun effetto ergogenico sportivo"},{l:"Sale",s:"bad",d:"Elevata sensibilità — max 4g/giorno. Evita scatolette in eccesso, insaccati"},{l:"Istamina",s:"warn",d:"Sensibilità aumentata — attenzione a formaggi stagionati, vino, cioccolato"},{l:"Solfiti",s:"warn",d:"Rischio accumulo — limita vino bianco, aceto, prodotti confezionati"},{l:"Alcol",s:"bad",d:"Slow metabolizer — max 2 bicchieri vino/giorno, solo a stomaco pieno"},{l:"Fruttosio",s:"good",d:"Non intollerante"},{l:"Nichel",s:"good",d:"Non rilevata sensibilità"}]},{cat:"Metabolismo",items:[{l:"Carboidrati",s:"warn",d:"Sensibilità alterata — carbo SOLO prima metà giornata, basso indice glicemico"},{l:"Grassi",s:"good",d:"Nella norma"},{l:"Sovrappeso",s:"warn",d:"Lievemente sfavorevole — le PROTEINE sono il carburante ottimale per il dimagrimento"},{l:"Sazietà",s:"warn",d:"Lieve alterazione leptina — inizia pasti con verdure"},{l:"Fame emotiva",s:"good",d:"Non rilevata predisposizione"}]},{cat:"Prevenzione",items:[{l:"Insulino-resistenza",s:"warn",d:"Lieve predisposizione — monitora glicemia annualmente"},{l:"B12/Folati",s:"warn",d:"Fabbisogno aumentato — integrare riducendo la carne"},{l:"Omocisteina",s:"warn",d:"Lieve predisposizione aumento — privilegia folati"},{l:"Colesterolo",s:"warn",d:"Lieve alterazione — evita grassi saturi/trans, privilegia omega-3"},{l:"Cardiovascolare",s:"warn",d:"Lieve rischio — evita grasso addominale, alcol, fumo"},{l:"Salute ossea",s:"warn",d:"Moderato rischio osteoporosi — vitamina D, calcio, sole 10 min/giorno"},{l:"DNA Repair",s:"good",d:"Favorevole"},{l:"Detossificazione",s:"good",d:"Nella norma"},{l:"Stress",s:"good",d:"Rapido adattamento — profilo favorevole"}]},{cat:"Sport/Articolazioni",items:[{l:"Tipo sport",s:"neutral",d:"Profilo intermedio potenza/resistenza"},{l:"VO2max",s:"bad",d:"Sfavorevole — il nuoto è il migliore per migliorarlo"},{l:"Ginocchio",s:"warn",d:"Lassità articolare + debolezza cartilagini — rinforza quadricipiti"},{l:"Lesioni muscolari",s:"warn",d:"Tempi di recupero più lunghi — riscaldamento OBBLIGATORIO"},{l:"Collagene",s:"bad",d:"Meno resistente — protezione solare 50+, carbo basso IG"}]}];
+const SC={good:"var(--green)",warn:"var(--yellow)",bad:"var(--red)",neutral:"var(--dim)"};
+const SBG={good:"rgba(74,222,128,0.1)",warn:"rgba(251,191,36,0.1)",bad:"rgba(248,113,113,0.1)",neutral:"rgba(148,163,184,0.1)"};
+
+// === TABS ===
+document.querySelectorAll('.tabs button').forEach(b=>{b.addEventListener('click',()=>{
+document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
+b.classList.add('active');
+document.querySelectorAll('[id^=tab-]').forEach(t=>t.classList.add('hidden'));
+document.getElementById('tab-'+b.dataset.tab).classList.remove('hidden');
+})});
+
+// === CHECKLIST ===
+function todayKey(){return new Date().toISOString().slice(0,10)}
+function getChecks(){try{return JSON.parse(localStorage.getItem('cz-checks-'+todayKey()))||{}}catch(e){return{}}}
+function setChecks(c){localStorage.setItem('cz-checks-'+todayKey(),JSON.stringify(c))}
+function renderChecks(){
+const c=getChecks(),el=document.getElementById('checkList');el.innerHTML='';
+let done=0;
+CHECKS.forEach(item=>{
+const isDone=!!c[item.k];if(isDone)done++;
+const row=document.createElement('div');row.className='check-row';
+row.innerHTML=`<div class="check-box${isDone?' done':''}">${isDone?'<span style="color:var(--green);font-size:13px;font-weight:700">✓</span>':''}</div><span class="check-label${isDone?' done':''}">${item.l}</span>`;
+row.addEventListener('click',()=>{const ch=getChecks();ch[item.k]=!ch[item.k];setChecks(ch);renderChecks()});
+el.appendChild(row)});
+document.getElementById('checkCount').textContent=done+'/7';
+document.getElementById('checkCount').style.color=done===7?'var(--green)':'var(--accent)';
+document.getElementById('checkBar').style.width=(done/7*100)+'%';
+document.getElementById('checkBar').style.background=done===7?'var(--green)':'var(--accent)';
+}
+renderChecks();
+
+// === EXERCISES ===
+function renderExList(data,containerId,color){
+const el=document.getElementById(containerId);
+data.forEach(ex=>{
+const div=document.createElement('div');div.className='card exercise';
+div.innerHTML=`<div class="top"><div><span class="ename">${ex.n}</span><span class="ereps" style="color:${color}">${ex.s||ex.r}</span></div><span class="etarget">${ex.t}</span></div><div class="detail">${ex.d}</div>`;
+div.addEventListener('click',()=>div.classList.toggle('open'));
+el.appendChild(div)});}
+renderExList(STRENGTH,'strengthList','var(--purple)');
+renderExList(MOBILITY,'mobilityList','var(--green)');
+
+// === DNA ===
+(function(){const el=document.getElementById('dnaList');
+DNA.forEach(cat=>{
+const h=document.createElement('div');h.className='dna-cat';h.textContent=cat.cat;el.appendChild(h);
+cat.items.forEach(item=>{
+const d=document.createElement('div');d.className='dna-item';d.style.background=SBG[item.s];
+d.innerHTML=`<div class="row"><div class="dot" style="background:${SC[item.s]}"></div><div class="lbl">${item.l}</div><span class="arrow">▼</span></div><div class="desc">${item.d}</div>`;
+d.addEventListener('click',()=>d.classList.toggle('open'));
+el.appendChild(d)})})})();
+
+// === TRACKER ===
+function getWeights(){try{return JSON.parse(localStorage.getItem('cz-weights'))||[]}catch(e){return[]}}
+function setWeights(w){localStorage.setItem('cz-weights',JSON.stringify(w))}
+function saveWeight(){
+const v=parseFloat(document.getElementById('weightInput').value);if(!v)return;
+const w=getWeights();w.push({kg:v,date:new Date().toLocaleDateString('it-IT')});
+setWeights(w);document.getElementById('weightInput').value='';renderTracker();updateLost();}
+function renderTracker(){
+const w=getWeights(),el=document.getElementById('trackerContent');
+if(!w.length){el.innerHTML='<div class="card" style="text-align:center;padding:28px"><div style="font-size:28px;margin-bottom:8px">⚖️</div><div style="font-size:14px;color:var(--muted)">Inserisci il primo peso per iniziare</div></div>';return}
+const cur=w[w.length-1].kg,lost=98-cur;
+let hist=w.slice().reverse().map(e=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px"><span style="color:var(--dim)">${e.date}</span><span style="font-weight:600">${e.kg} kg</span></div>`).join('');
+el.innerHTML=`<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:14px"><div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Ultimo peso</div><div style="font-size:26px;font-weight:700">${cur} kg</div></div><div style="text-align:right"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Persi dal via</div><div style="font-size:26px;font-weight:700;color:${lost>0?'var(--green)':'var(--muted)'}">${lost>0?'-'+lost.toFixed(1):'0'} kg</div></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:4px"><span>98 kg</span><span>Obiettivo: 88 kg</span></div><div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,lost/10*100)}%;background:linear-gradient(90deg,var(--accent),var(--green))"></div></div><div style="font-size:11px;color:var(--muted);margin-top:12px">Storico</div><div style="max-height:180px;overflow-y:auto;margin-top:6px">${hist}</div></div>`}
+function updateLost(){const w=getWeights();if(w.length){const l=98-w[w.length-1].kg;document.getElementById('lostStat').textContent=l>0?l.toFixed(1)+'kg':'—';document.getElementById('lostSub').textContent=l>0?'continua così':'iniziamo!'}}
+renderTracker();updateLost();
+</script>
+</body>
+</html>
